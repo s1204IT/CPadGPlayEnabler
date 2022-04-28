@@ -1,0 +1,2 @@
+# CPadGPlayEnabler
+チャレンジパッドでGoogleサービス及びmicroGを使えるようにする為のスクリプト
