@@ -8,7 +8,7 @@ Clear-Host
 
 
 # 端末識別
-If ($(adb shell getprop ro.product.model) -Like "TAB-A03-B[S,BR,BR2]") {
+If ($(adb shell getprop ro.product.model) -Like "TAB-A03-B[S,R,R2]") {
     Write-Output "｢チャレンジパッド２｣が検出されました"
     Set-Variable -Name CT2 -Value 1
 } ElseIf ($(adb shell getprop ro.product.model) -Like "TAB-A03-BR3") {
