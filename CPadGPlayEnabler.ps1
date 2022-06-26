@@ -55,8 +55,8 @@ If ($CT2 -Eq 1){
 }
 
 # Google Play開発者サービス | microG Services Core
-Write-Output "｢Google Play開発者サービス｣をインストール中..."
 If ($CT2 -Eq 1) {
+    Write-Output "｢Google Play開発者サービス｣をインストール中..."
     # https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=3181340
     adb install .\assets\GmsCore_214858006.apk | Out-Null
     Write-Output "｢Google Play開発者サービス｣に権限を付与中..."
