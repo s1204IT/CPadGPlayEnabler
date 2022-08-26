@@ -1,75 +1,81 @@
+ï»¿Clear-Host
+Set-Variable -Name ErrorActionPreference -Value SilentlyContinue
+
+# ADBã‚µãƒ¼ãƒé–‹å§‹
+adb start-server | Out-Null
+If ($? -Eq $false) {
+    If ($(Test-Path .\assets\platform-tools) -Ne "True") {
+        Set-Variable -Name ProgressPreference -Value SilentlyContinue
+        Invoke-WebRequest -Uri https://dl.google.com/android/repository/platform-tools-latest-windows.zip -OutFile .\assets\platform-tools.zip -UseBasicParsing
+        Expand-Archive -Path .\assets\platform-tools.zip -Force
+        Move-Item -Path .\platform-tools\platform-tools\ .\assets\ -Force
+        Remove-Item -Path .\assets\platform-tools.zip -Recurse
+        Remove-Item -Path .\platform-tools -Recurse
+    }
+    Set-Item Env:Path "$(Convert-Path .\assets\platform-tools\);$Env:Path;" -Force
+    adb start-server
+} Clear-Host
+
+
+# ç«¯æœ«è­˜åˆ¥
+Set-Variable -Name Model -Value $(adb shell getprop ro.product.model)
 Clear-Host
-
-
-# ADBƒpƒX‚Ìİ’è^ƒT[ƒoŠJn
-Set-Item env:Path "$env:Path;$(Convert-Path .\assets\DebugBridge\);"
-adb start-server
-Clear-Host
-
-
-# ’[––¯•Ê
-If ($(adb shell getprop ro.product.model) -Like "TAB-A03-B[S,R,R2]") {
-    Write-Output "¢ƒ`ƒƒƒŒƒ“ƒWƒpƒbƒh‚Q£‚ªŒŸo‚³‚ê‚Ü‚µ‚½"
+If ($Model -Like "TAB-A03-B[S,R,R2]") {
+    Write-Output "ï½¢ãƒãƒ£ãƒ¬ãƒ³ã‚¸ãƒ‘ãƒƒãƒ‰ï¼’ï½£ãŒæ¤œå‡ºã•ã‚Œã¾ã—ãŸ"
     Set-Variable -Name CT2 -Value 1
-} ElseIf ($(adb shell getprop ro.product.model) -Like "TAB-A03-BR3") {
-    Write-Output "¢ƒ`ƒƒƒŒƒ“ƒWƒpƒbƒh‚R£‚ªŒŸo‚³‚ê‚Ü‚µ‚½"
-    Set-Variable -Name CT3 -Value 1
-} ElseIf ($(adb shell getprop ro.product.model) -Like "TAB-A05-B[D,A1]") {
-    Write-Output "¢ƒ`ƒƒƒŒƒ“ƒWƒpƒbƒhNeo/Next£‚ªŒŸo‚³‚ê‚Ü‚µ‚½"
+} ElseIf ($Model -Like "TAB-A03-BR3") {
+    Write-Output "ï½¢ãƒãƒ£ãƒ¬ãƒ³ã‚¸ãƒ‘ãƒƒãƒ‰ï¼“ï½£ãŒæ¤œå‡ºã•ã‚Œã¾ã—ãŸ"
+} ElseIf ($Model -Like "TAB-A05-B[D,A1]") {
+    Write-Output "ï½¢ãƒãƒ£ãƒ¬ãƒ³ã‚¸ãƒ‘ãƒƒãƒ‰Neo/Nextï½£ãŒæ¤œå‡ºã•ã‚Œã¾ã—ãŸ"
 } Else {
-    Write-Output "ƒ`ƒƒƒŒƒ“ƒWƒpƒbƒh‚ªŒŸo‚³‚ê‚Ü‚¹‚ñ‚Å‚µ‚½"
-    Read-Host "‚à‚¤ˆê“x‚â‚è’¼‚µ‚Ä‰º‚³‚¢¡(Enter)"
+    Write-Output "ãƒãƒ£ãƒ¬ãƒ³ã‚¸ãƒ‘ãƒƒãƒ‰ãŒæ¤œå‡ºã•ã‚Œã¾ã›ã‚“ã§ã—ãŸ"
     adb kill-server
+    Read-Host "ã‚‚ã†ä¸€åº¦ã‚„ã‚Šç›´ã—ã¦ä¸‹ã•ã„ï½¡(Enter)"
     Clear-Host
     exit 1
-} Read-Host "‘±s‚µ‚Ü‚·‚©H(Enter)"
+} Read-Host "ç¶šè¡Œã—ã¾ã™ã‹ï¼Ÿ(Enter)"
 Clear-Host
 
 
-# GoogleƒT[ƒrƒX‚ÌƒCƒ“ƒXƒg[ƒ‹
+# Googleã‚µãƒ¼ãƒ“ã‚¹ã®ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«
 
-# GoogleƒAƒJƒEƒ“ƒgƒ}ƒl[ƒWƒƒ[
+# Googleã‚¢ã‚«ã‚¦ãƒ³ãƒˆãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼
 If ($CT2 -Eq 1) {
-    Write-Output "¢GoogleƒAƒJƒEƒ“ƒgƒ}ƒl[ƒWƒƒ[£‚ğƒCƒ“ƒXƒg[ƒ‹’†..."
-    # https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=97485
+    Write-Output "ï½¢Googleã‚¢ã‚«ã‚¦ãƒ³ãƒˆãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ï½£ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ä¸­..."
     adb install .\assets\GoogleLoginService_22.apk | Out-Null
-    Write-Output "¢GoogleƒAƒJƒEƒ“ƒgƒ}ƒl[ƒWƒƒ[£‚ÉŒ ŒÀ‚ğ•t—^’†..."
+    Write-Output "ï½¢Googleã‚¢ã‚«ã‚¦ãƒ³ãƒˆãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ï½£ã«æ¨©é™ã‚’ä»˜ä¸ä¸­..."
     adb shell pm grant com.google.android.gsf.login android.permission.DUMP
     adb shell pm grant com.google.android.gsf.login android.permission.READ_LOGS
 }
 
-# GoogleƒT[ƒrƒXƒtƒŒ[ƒ€ƒ[ƒN | microG Services Framework Proxy
+# Googleã‚µãƒ¼ãƒ“ã‚¹ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¯ãƒ¼ã‚¯ | microG Services Framework Proxy
 If ($CT2 -Eq 1){
-    Write-Output "¢GoogleƒT[ƒrƒXƒtƒŒ[ƒ€ƒ[ƒN£‚ğƒCƒ“ƒXƒg[ƒ‹’†..."
-    # https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=83724
+    Write-Output "ï½¢Googleã‚µãƒ¼ãƒ“ã‚¹ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¯ãƒ¼ã‚¯ï½£ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ä¸­..."
     adb install .\assets\GoogleServicesFramework_19.apk | Out-Null
-    Write-Output "¢GoogleƒT[ƒrƒXƒtƒŒ[ƒ€ƒ[ƒN£‚ÉŒ ŒÀ‚ğ•t—^’†..."
+    Write-Output "ï½¢Googleã‚µãƒ¼ãƒ“ã‚¹ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¯ãƒ¼ã‚¯ï½£ã«æ¨©é™ã‚’ä»˜ä¸ä¸­..."
     adb shell pm grant com.google.android.gsf android.permission.DUMP
     adb shell pm grant com.google.android.gsf android.permission.READ_LOGS
     adb shell pm grant com.google.android.gsf android.permission.WRITE_SECURE_SETTINGS
     adb shell pm grant com.google.android.gsf android.permission.INTERACT_ACROSS_USERS
 } Else {
-    Write-Output "¢microG Services Framework Proxy£‚ğƒCƒ“ƒXƒg[ƒ‹’†..."
-    # https://github.com/microg/android_packages_apps_GsfProxy/releases/download/v0.1.0/GsfProxy.apk
+    Write-Output "ï½¢microG Services Framework Proxyï½£ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ä¸­..."
     adb install .\assets\microG\GsfProxy.apk | Out-Null
 }
 
-# Google PlayŠJ”­ÒƒT[ƒrƒX | microG Services Core
+# Google Playé–‹ç™ºè€…ã‚µãƒ¼ãƒ“ã‚¹ | microG Services Core
 If ($CT2 -Eq 1) {
-    Write-Output "¢Google PlayŠJ”­ÒƒT[ƒrƒX£‚ğƒCƒ“ƒXƒg[ƒ‹’†..."
-    # https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=3181340
+    Write-Output "ï½¢Google Playé–‹ç™ºè€…ã‚µãƒ¼ãƒ“ã‚¹ï½£ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ä¸­..."
     adb install .\assets\GmsCore_214858006.apk | Out-Null
-    Write-Output "¢Google PlayŠJ”­ÒƒT[ƒrƒX£‚ÉŒ ŒÀ‚ğ•t—^’†..."
+    Write-Output "ï½¢Google Playé–‹ç™ºè€…ã‚µãƒ¼ãƒ“ã‚¹ï½£ã«æ¨©é™ã‚’ä»˜ä¸ä¸­..."
     adb shell pm grant com.google.android.gms android.permission.INTERACT_ACROSS_USERS
     adb shell pm grant com.google.android.gms android.permission.PACKAGE_USAGE_STATS
     adb shell pm grant com.google.android.gms android.permission.GET_APP_OPS_STATS
     adb shell pm grant com.google.android.gms android.permission.READ_LOGS
     adb shell dpm set-active-admin --user 0 com.google.android.gms/.mdm.receivers.MdmDeviceAdminReceiver | Out-Null
 } Else {
-    Write-Output "¢microG Services Core£‚ğƒCƒ“ƒXƒg[ƒ‹’†..."
-    # https://github.com/microg/GmsCore/releases/download/v0.2.24.214816/com.google.android.gms-214816048.apk
+    Write-Output "ï½¢microG Services Coreï½£ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ä¸­..."
     adb install .\assets\microG\com.google.android.gms-214816048.apk | Out-Null
-    Write-Output "¢microG Services Core£‚ÉŒ ŒÀ‚ğ•t—^’†..."
+    Write-Output "ï½¢microG Services Coreï½£ã«æ¨©é™ã‚’ä»˜ä¸ä¸­..."
     adb shell pm grant com.google.android.gms android.permission.ACCESS_COARSE_LOCATION
     adb shell pm grant com.google.android.gms android.permission.ACCESS_FINE_LOCATION
     adb shell pm grant com.google.android.gms android.permission.READ_PHONE_STATE
@@ -81,40 +87,19 @@ If ($CT2 -Eq 1) {
     adb shell dumpsys deviceidle whitelist +"com.google.android.gms" | Out-Null
 }
 
-# Google PlayƒXƒgƒA | FakeStore
-If ($CT3 -Ne 1) {
-    Write-Output "¢Google PlayƒXƒgƒA£‚ğƒCƒ“ƒXƒg[ƒ‹’†..."
-    If ($CT2 -Eq 1) {
-        # https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=2860119&forcebaseapk
-        adb install .\assets\Phonesky_82791710.apk | Out-Null
-    } Else {
-        # https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=1360568
-        adb install .\assets\Phonesky_82092000.apk | Out-Null
-        adb shell am force-stop com.android.vending
-    }
-    Write-Output "¢Google PlayƒXƒgƒA£‚ÉŒ ŒÀ‚ğ•t—^’†..."
+# Google Playã‚¹ãƒˆã‚¢ | FakeStore
+Write-Output "ï½¢Google Playã‚¹ãƒˆã‚¢ï½£ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ä¸­..."
+If ($CT2 -Eq 1) {
+    adb install .\assets\Phonesky_82791710.apk | Out-Null
+    Write-Output "ï½¢Google Playã‚¹ãƒˆã‚¢ï½£ã«æ¨©é™ã‚’ä»˜ä¸ä¸­..."
     adb shell pm grant com.android.vending android.permission.PACKAGE_USAGE_STATS
     adb shell pm grant com.android.vending android.permission.BATTERY_STATS
     adb shell pm grant com.android.vending android.permission.DUMP
     adb shell pm grant com.android.vending android.permission.GET_APP_OPS_STATS
     adb shell pm grant com.android.vending android.permission.INTERACT_ACROSS_USERS
     adb shell pm grant com.android.vending android.permission.WRITE_SECURE_SETTINGS
-    If ($CT2 -Ne 1) {
-        adb shell pm grant com.android.vending android.permission.SEND_SMS
-        adb shell pm grant com.android.vending android.permission.RECEIVE_SMS
-        adb shell pm grant com.android.vending android.permission.READ_SMS
-        adb shell pm grant com.android.vending android.permission.WRITE_EXTERNAL_STORAGE
-        adb shell pm grant com.android.vending android.permission.READ_EXTERNAL_STORAGE
-        adb shell pm grant com.android.vending android.permission.READ_PHONE_STATE
-        adb shell pm grant com.android.vending android.permission.ACCESS_COARSE_LOCATION
-        adb shell pm grant com.android.vending android.permission.READ_CONTACTS
-        adb shell am start -n com.android.vending/com.google.android.finsky.activities.SettingsActivity | Out-Null
-        Start-Sleep 1
-        adb shell am force-stop com.android.vending
-    }
 } Else {
-    Write-Output "¢FakeStore£‚ğƒCƒ“ƒXƒg[ƒ‹’†..."
-    # https://github.com/microg/FakeStore/releases/download/v0.1.0/FakeStore-v0.1.0.apk
+    Write-Output "ï½¢FakeStoreï½£ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ä¸­..."
     adb install .\assets\microG\FakeStore-v0.1.0.apk | Out-Null
 } Clear-Host
 
@@ -124,8 +109,8 @@ adb reboot
 
 
 # End Script
-Write-Output "ˆ—‚ªŠ®—¹‚µ‚Ü‚µ‚½"
-Read-Host "Enter‚ğ‰Ÿ‚µ‚ÄI—¹‚µ‚Ä‰º‚³‚¢"
+Write-Output "å‡¦ç†ãŒå®Œäº†ã—ã¾ã—ãŸ"
+Read-Host "Enterã‚’æŠ¼ã—ã¦çµ‚äº†ã—ã¦ä¸‹ã•ã„"
 adb kill-server
 Clear-Host
 exit 0
