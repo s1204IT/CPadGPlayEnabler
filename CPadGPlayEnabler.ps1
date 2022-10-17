@@ -1,28 +1,32 @@
-﻿Clear-Host
-Set-Variable -Name ErrorActionPreference -Value SilentlyContinue
+Clear-Host
+$Host.UI.RawUI.WindowTitle = "CPadTabletter"
 
 # ADBサーバ開始
+$ErrorActionPreference = "SilentlyContinue"
 adb start-server | Out-Null
+# ADBサーバの開始に失敗した場合に最新版を導入
 If ($? -Eq $false) {
+    # ダウンロード済みかどうかを検証
     If ($(Test-Path .\assets\platform-tools) -Ne "True") {
-        Set-Variable -Name ProgressPreference -Value SilentlyContinue
+        $ProgressPreference = "SilentlyContinue"
         Invoke-WebRequest -Uri https://dl.google.com/android/repository/platform-tools-latest-windows.zip -OutFile .\assets\platform-tools.zip -UseBasicParsing
         Expand-Archive -Path .\assets\platform-tools.zip -Force
         Move-Item -Path .\platform-tools\platform-tools\ .\assets\ -Force
         Remove-Item -Path .\assets\platform-tools.zip -Recurse
         Remove-Item -Path .\platform-tools -Recurse
     }
+    # Path に追加
     Set-Item Env:Path "$(Convert-Path .\assets\platform-tools\);$Env:Path;" -Force
     adb start-server
-} Clear-Host
-
+}
+Clear-Host
 
 # 端末識別
-Set-Variable -Name Model -Value $(adb shell getprop ro.product.model)
-Clear-Host
+$Model = "$(adb shell getprop ro.product.model)"
+
 If ($Model -Like "TAB-A03-B[S,R,R2]") {
     Write-Output "｢チャレンジパッド２｣が検出されました"
-    Set-Variable -Name CT2 -Value 1
+    $CT2 = 1
 } ElseIf ($Model -Like "TAB-A03-BR3") {
     Write-Output "｢チャレンジパッド３｣が検出されました"
 } ElseIf ($Model -Like "TAB-A05-B[D,A1]") {
@@ -33,9 +37,9 @@ If ($Model -Like "TAB-A03-B[S,R,R2]") {
     Read-Host "もう一度やり直して下さい｡(Enter)"
     Clear-Host
     exit 1
-} Read-Host "続行しますか？(Enter)"
+}
+Read-Host "続行しますか？(Enter)"
 Clear-Host
-
 
 # Googleサービスのインストール
 
@@ -101,14 +105,13 @@ If ($CT2 -Eq 1) {
 } Else {
     Write-Output "｢FakeStore｣をインストール中..."
     adb install .\assets\microG\FakeStore-v0.1.0.apk | Out-Null
-} Clear-Host
+}
+Clear-Host
 
-
-# Rebooting Tablet
+# 端末を再起動
 adb reboot
 
-
-# End Script
+# スクリプトを終了
 Write-Output "処理が完了しました"
 Read-Host "Enterを押して終了して下さい"
 adb kill-server
