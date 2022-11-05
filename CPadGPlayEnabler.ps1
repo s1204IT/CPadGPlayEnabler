@@ -1,5 +1,5 @@
 Clear-Host
-$Host.UI.RawUI.WindowTitle = "CPadTabletter"
+$Host.UI.RawUI.WindowTitle = "CPadGPlayEnabler"
 
 # ADBサーバ開始
 $ErrorActionPreference = "SilentlyContinue"
