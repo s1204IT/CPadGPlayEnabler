@@ -24,16 +24,15 @@ Clear-Host
 # 端末識別
 $Model = "$(adb shell getprop ro.product.model)"
 
-If ($Model -Like "TAB-A03-B[S,R,R2]") {
+If (($Model -Like "TAB-A03-B[S,R]") -Or ($Model -Like "TAB-A03-BR2")) {
     Write-Output "｢チャレンジパッド２｣が検出されました"
     $CT2 = 1
 } ElseIf ($Model -Like "TAB-A03-BR3") {
     Write-Output "｢チャレンジパッド３｣が検出されました"
-} ElseIf ($Model -Like "TAB-A05-B[D,A1]") {
+} ElseIf (($Model -Like "TAB-A05-BD") -Or ($Model -Like "TAB-A05-BA1")) {
     Write-Output "｢チャレンジパッドNeo/Next｣が検出されました"
 } Else {
     Write-Output "チャレンジパッドが検出されませんでした"
-    adb kill-server
     Read-Host "もう一度やり直して下さい｡(Enter)"
     Clear-Host
     exit 1
