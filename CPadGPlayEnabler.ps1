@@ -4,16 +4,17 @@ $Host.UI.RawUI.WindowTitle = "CPadGPlayEnabler"
 # ADBサーバ開始
 $ErrorActionPreference = "SilentlyContinue"
 adb start-server | Out-Null
-# ADBサーバの開始に失敗した場合に最新版を導入
+# ADBコマンドの実行に失敗した場合に最新版を導入
 If ($? -Eq $false) {
     # ダウンロード済みかどうかを検証
     If ($(Test-Path .\assets\platform-tools) -Ne "True") {
         $ProgressPreference = "SilentlyContinue"
+        Write-Output "ADBをダウンロード中..."
         Invoke-WebRequest -Uri https://dl.google.com/android/repository/platform-tools-latest-windows.zip -OutFile .\assets\platform-tools.zip -UseBasicParsing
         Expand-Archive -Path .\assets\platform-tools.zip -Force
         Move-Item -Path .\platform-tools\platform-tools\ .\assets\ -Force
         Remove-Item -Path .\assets\platform-tools.zip -Recurse
-        Remove-Item -Path .\platform-tools -Recurse
+        Remove-Item -Path .\platform-tools -Recurse -Force
     }
     # Path に追加
     Set-Item Env:Path "$(Convert-Path .\assets\platform-tools\);$Env:Path;" -Force
@@ -34,6 +35,7 @@ If (($Model -Like "TAB-A03-B[S,R]") -Or ($Model -Like "TAB-A03-BR2")) {
 } Else {
     Write-Output "チャレンジパッドが検出されませんでした"
     Read-Host "もう一度やり直して下さい｡(Enter)"
+    adb kill-server
     Clear-Host
     exit 1
 }
@@ -77,7 +79,7 @@ If ($CT2 -Eq 1) {
     adb shell dpm set-active-admin --user 0 com.google.android.gms/.mdm.receivers.MdmDeviceAdminReceiver | Out-Null
 } Else {
     Write-Output "｢microG Services Core｣をインストール中..."
-    adb install .\assets\microG\com.google.android.gms-214816048.apk | Out-Null
+    adb install .\assets\microG\com.google.android.gms-223616054.apk | Out-Null
     Write-Output "｢microG Services Core｣に権限を付与中..."
     adb shell pm grant com.google.android.gms android.permission.ACCESS_COARSE_LOCATION
     adb shell pm grant com.google.android.gms android.permission.ACCESS_FINE_LOCATION
