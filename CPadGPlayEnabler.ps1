@@ -3,18 +3,16 @@ $Host.UI.RawUI.WindowTitle = "CPadGPlayEnabler"
 
 # ADBサーバ開始
 $ErrorActionPreference = "SilentlyContinue"
-adb start-server | Out-Null
 # ADBコマンドの実行に失敗した場合に最新版を導入
-If ($? -Eq $false) {
+if ($(adb start-server | Out-Null) -eq $false) {
     # ダウンロード済みかどうかを検証
-    If ($(Test-Path .\assets\platform-tools) -Ne "True") {
+    if ($(Test-Path .\assets\platform-tools) -ne $true) {
         $ProgressPreference = "SilentlyContinue"
         Write-Output "ADBをダウンロード中..."
         Invoke-WebRequest -Uri https://dl.google.com/android/repository/platform-tools-latest-windows.zip -OutFile .\assets\platform-tools.zip -UseBasicParsing
         Expand-Archive -Path .\assets\platform-tools.zip -Force
         Move-Item -Path .\platform-tools\platform-tools\ .\assets\ -Force
-        Remove-Item -Path .\assets\platform-tools.zip -Recurse
-        Remove-Item -Path .\platform-tools -Recurse -Force
+        Remove-Item -Path .\assets\platform-tools.zip,.\platform-tools -Recurse -Force
     }
     # Path に追加
     Set-Item Env:Path "$(Convert-Path .\assets\platform-tools\);$Env:Path;" -Force
@@ -22,90 +20,87 @@ If ($? -Eq $false) {
 }
 Clear-Host
 
-# 端末識別
-$Model = "$(adb shell getprop ro.product.model)"
 
-If (($Model -Like "TAB-A03-B[S,R]") -Or ($Model -Like "TAB-A03-BR2")) {
-    Write-Output "｢チャレンジパッド２｣が検出されました"
-    $CT2 = 1
-} ElseIf ($Model -Like "TAB-A03-BR3") {
-    Write-Output "｢チャレンジパッド３｣が検出されました"
-} ElseIf (($Model -Like "TAB-A05-BD") -Or ($Model -Like "TAB-A05-BA1")) {
-    Write-Output "｢チャレンジパッドNeo/Next｣が検出されました"
-} Else {
-    Write-Output "チャレンジパッドが検出されませんでした"
-    Read-Host "もう一度やり直して下さい｡(Enter)"
-    adb kill-server
-    Clear-Host
-    exit 1
+# 関数
+function ExistDevice ($DeviceName) {
+    Write-Output "｢$DeviceName｣が検出されました"
+}
+
+function InstApp ($AppName, $AppPackage) {
+    Write-Output "｢$AppName｣をインストール中..."
+    adb install -r .\assets\$AppPackage.apk | Out-Null
+}
+
+function GrantApp ($AppName, $AppPackage, $perms) {
+    Write-Output "｢$AppName｣に権限を付与中..."
+    foreach ($NowPerm in $perms) {
+        adb shell pm grant $AppPackage android.permission.$NowPerm
+    }
+}
+
+# 端末識別
+switch ($(adb shell getprop ro.product.model)) {
+    ({"TAB-A03-B[S,R]" -or "TAB-A05-BR2"}) {
+        ExistDevice "チャレンジパッド２"
+        $CT2 = 1
+    }
+    "TAB-A03-BR3" {
+        ExistDevice "チャレンジパッド３"
+        Start-Process "https://github.com/s1204IT/CPadGApps/tree/CT3"
+        Write-Output "`r`nCPadGAppsが利用出来ます`r`n"
+    }
+    "TAB-A05-BD" {
+        ExistDevice "チャレンジパッドNeo"
+    }
+    "TAB-A05-BA1" {
+        ExistDevice "チャレンジパッドNext"
+    }
+    default {
+        Write-Output "チャレンジパッドが検出されませんでした"
+        Read-Host "もう一度やり直して下さい｡(Enter)"
+        adb kill-server
+        Clear-Host
+        exit 1
+    }
 }
 Read-Host "続行しますか？(Enter)"
 Clear-Host
 
+
 # Googleサービスのインストール
 
-# Googleアカウントマネージャー
-If ($CT2 -Eq 1) {
-    Write-Output "｢Googleアカウントマネージャー｣をインストール中..."
-    adb install .\assets\GoogleLoginService_22.apk | Out-Null
-    Write-Output "｢Googleアカウントマネージャー｣に権限を付与中..."
-    adb shell pm grant com.google.android.gsf.login android.permission.DUMP
-    adb shell pm grant com.google.android.gsf.login android.permission.READ_LOGS
-}
+if ($CT2 -eq 1) {
+    
+    # Googleアカウントマネージャー
+    InstApp "Googleアカウントマネージャー" GoogleLoginService_22
+    GrantApp "Googleアカウントマネージャー" com.google.android.gsf.login DUMP,READ_LOGS
 
-# Googleサービスフレームワーク | microG Services Framework Proxy
-If ($CT2 -Eq 1){
-    Write-Output "｢Googleサービスフレームワーク｣をインストール中..."
-    adb install .\assets\GoogleServicesFramework_19.apk | Out-Null
-    Write-Output "｢Googleサービスフレームワーク｣に権限を付与中..."
-    adb shell pm grant com.google.android.gsf android.permission.DUMP
-    adb shell pm grant com.google.android.gsf android.permission.READ_LOGS
-    adb shell pm grant com.google.android.gsf android.permission.WRITE_SECURE_SETTINGS
-    adb shell pm grant com.google.android.gsf android.permission.INTERACT_ACROSS_USERS
-} Else {
-    Write-Output "｢microG Services Framework Proxy｣をインストール中..."
-    adb install .\assets\microG\GsfProxy.apk | Out-Null
-}
+    # Googleサービスフレームワーク
+    InstApp "Googleサービスフレームワーク" GoogleServicesFramework_19
+    GrantApp "Googleサービスフレームワーク" com.google.android.gsf DUMP,READ_LOGS,WRITE_SECURE_SETTINGS,INTERACT_ACROSS_USERS
 
-# Google Play開発者サービス | microG Services Core
-If ($CT2 -Eq 1) {
-    Write-Output "｢Google Play開発者サービス｣をインストール中..."
-    adb install .\assets\GmsCore_214858006.apk | Out-Null
-    Write-Output "｢Google Play開発者サービス｣に権限を付与中..."
-    adb shell pm grant com.google.android.gms android.permission.INTERACT_ACROSS_USERS
-    adb shell pm grant com.google.android.gms android.permission.PACKAGE_USAGE_STATS
-    adb shell pm grant com.google.android.gms android.permission.GET_APP_OPS_STATS
-    adb shell pm grant com.google.android.gms android.permission.READ_LOGS
+    # Google Play開発者サービス
+    InstApp "Google Play開発者サービス" GmsCore_225014006
+    GrantApp "Google Play開発者サービス" com.google.android.gms INTERACT_ACROSS_USERS,PACKAGE_USAGE_STATS,GET_APP_OPS_STATS,READ_LOGS
     adb shell dpm set-active-admin --user 0 com.google.android.gms/.mdm.receivers.MdmDeviceAdminReceiver | Out-Null
-} Else {
-    Write-Output "｢microG Services Core｣をインストール中..."
-    adb install .\assets\microG\com.google.android.gms-223616054.apk | Out-Null
-    Write-Output "｢microG Services Core｣に権限を付与中..."
-    adb shell pm grant com.google.android.gms android.permission.ACCESS_COARSE_LOCATION
-    adb shell pm grant com.google.android.gms android.permission.ACCESS_FINE_LOCATION
-    adb shell pm grant com.google.android.gms android.permission.READ_PHONE_STATE
-    adb shell pm grant com.google.android.gms android.permission.GET_ACCOUNTS
-    adb shell pm grant com.google.android.gms android.permission.WRITE_EXTERNAL_STORAGE
-    adb shell pm grant com.google.android.gms android.permission.READ_EXTERNAL_STORAGE
-    adb shell pm grant com.google.android.gms android.permission.RECEIVE_SMS
-    adb shell pm grant com.google.android.gms android.permission.SYSTEM_ALERT_WINDOW
-    adb shell dumpsys deviceidle whitelist +"com.google.android.gms" | Out-Null
-}
 
-# Google Playストア | FakeStore
-Write-Output "｢Google Playストア｣をインストール中..."
-If ($CT2 -Eq 1) {
-    adb install .\assets\Phonesky_82791710.apk | Out-Null
-    Write-Output "｢Google Playストア｣に権限を付与中..."
-    adb shell pm grant com.android.vending android.permission.PACKAGE_USAGE_STATS
-    adb shell pm grant com.android.vending android.permission.BATTERY_STATS
-    adb shell pm grant com.android.vending android.permission.DUMP
-    adb shell pm grant com.android.vending android.permission.GET_APP_OPS_STATS
-    adb shell pm grant com.android.vending android.permission.INTERACT_ACROSS_USERS
-    adb shell pm grant com.android.vending android.permission.WRITE_SECURE_SETTINGS
+    # Google Playストア
+    InstApp "Google Playストア" Phonesky_82791710
+    GrantApp "Google Playストア" com.android.vending PACKAGE_USAGE_STATS,BATTERY_STATS,DUMP,GET_APP_OPS_STATS,INTERACT_ACROSS_USERS,WRITE_SECURE_SETTINGS
+
 } Else {
-    Write-Output "｢FakeStore｣をインストール中..."
-    adb install .\assets\microG\FakeStore-v0.1.0.apk | Out-Null
+
+    # microG Services Framework Proxy
+    InstApp "microG Services Framework Proxy" microG\GsfProxy
+
+    # microG Services Core
+    InstApp "microG Services Core" microG\com.google.android.gms-231657056
+    GrantApp "microG Services Core" com.google.android.gms ACCESS_COARSE_LOCATION,ACCESS_FINE_LOCATION,READ_PHONE_STATE,GET_ACCOUNTS,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,RECEIVE_SMS,SYSTEM_ALERT_WINDOW,BODY_SENSORS
+    adb shell dumpsys deviceidle whitelist +"com.google.android.gms" | Out-Null
+
+    # FakeStore
+    InstApp "FakeStore" microG\com.android.vending-30
+
 }
 Clear-Host
 
