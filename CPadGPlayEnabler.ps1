@@ -22,8 +22,8 @@ Clear-Host
 
 
 # 関数
-function ExistDevice ($DeviceName) {
-    Write-Output "｢$DeviceName｣が検出されました"
+function ExistCPad ($CPadType) {
+    Write-Output "｢チャレンジパッド$CPadType｣が検出されました"
 }
 
 function InstApp ($AppName, $AppPackage) {
@@ -39,22 +39,18 @@ function GrantApp ($AppName, $AppPackage, $perms) {
 }
 
 # 端末識別
-switch ($(adb shell getprop ro.product.model)) {
+switch ("$(adb shell getprop ro.product.model)") {
     ({"TAB-A03-B[S,R]" -or "TAB-A05-BR2"}) {
-        ExistDevice "チャレンジパッド２"
+        ExistCPad "２"
         $CT2 = 1
     }
     "TAB-A03-BR3" {
-        ExistDevice "チャレンジパッド３"
+        ExistCPad "３"
         Start-Process "https://github.com/s1204IT/CPadGApps/tree/CT3"
         Write-Output "`r`nCPadGAppsが利用出来ます`r`n"
     }
-    "TAB-A05-BD" {
-        ExistDevice "チャレンジパッドNeo"
-    }
-    "TAB-A05-BA1" {
-        ExistDevice "チャレンジパッドNext"
-    }
+    "TAB-A05-BD" { ExistCPad "Neo" }
+    "TAB-A05-BA1" { ExistCPad "Next" }
     default {
         Write-Output "チャレンジパッドが検出されませんでした"
         Read-Host "もう一度やり直して下さい｡(Enter)"
