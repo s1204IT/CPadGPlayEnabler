@@ -40,7 +40,7 @@ function GrantApp ($AppName, $AppPackage, $perms) {
 
 # 端末識別
 switch ("$(adb shell getprop ro.product.model)") {
-    ({"TAB-A03-B[S,R]" -or "TAB-A05-BR2"}) {
+    ({"TAB-A03-B[S,R]" -or "TAB-A03-BR2"}) {
         ExistCPad "２"
         $CT2 = 1
     }
@@ -84,7 +84,7 @@ if ($CT2 -eq 1) {
     InstApp "Google Playストア" Phonesky_82791710
     GrantApp "Google Playストア" com.android.vending PACKAGE_USAGE_STATS,BATTERY_STATS,DUMP,GET_APP_OPS_STATS,INTERACT_ACROSS_USERS,WRITE_SECURE_SETTINGS
 
-} Else {
+} else {
 
     # microG Services Framework Proxy
     InstApp "microG Services Framework Proxy" microG\GsfProxy
