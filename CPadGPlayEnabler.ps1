@@ -39,9 +39,8 @@ function GrantApp ($AppName, $AppPackage, $perms) {
 }
 
 # 端末識別
-$CPadModel = $(adb shell getprop ro.product.model)
-switch ($CPadModel) {
-    ({"TAB-A03-B[S,R]" -or "TAB-A03-BR2"}) {
+switch ($(adb shell getprop ro.product.model)) {
+    ("TAB-A03-B[S,R]" -or "TAB-A03-BR2") {
         ExistCPad "２"
         $CT2 = 1
     }
@@ -73,10 +72,10 @@ if ($CTZ -eq 1) {
         Write-Output "Google Playストア を使用するには DchaState を 3 にする必要があります `r`n"
         Write-Output "Play ストア を利用する場合は｢y｣と入力してEnter､`r`nmicroGを利用する場合は何も入力せずEnterを押して下さい`r`n"
         $confirm = Read-Host "Google Playストアを利用しますか？"
-        if ($confirm -ne "y") {
-            $CTZ = 0
-        } else {
+        if ($confirm -eq "y") {
             adb shell settings put system dcha_state 3
+        } else {
+            $CTZ = 0
         }
     }
     Clear-Host
@@ -131,6 +130,9 @@ if ($CT2 -eq 1) {
     InstApp "Googleカレンダーの同期" CTZ\GoogleCalendarSyncAdapter
     
 } else {
+
+    # 再起動後もUSBデバッグの状態を維持
+    adb shell settings put system bc_password_hit 1
 
     # microG Services Framework Proxy
     InstApp "microG Services Framework Proxy" microG\GsfProxy
