@@ -1,2 +1,2 @@
 @echo off
-start powershell.exe -File .\CPadGPlayEnabler.ps1 -ExecutionPolicy Bypass
+start powershell.exe -ExecutionPolicy Bypass -Command .\CPadGPlayEnabler.ps1
