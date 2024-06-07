@@ -1,10 +1,15 @@
 # CPadGPlayEnabler
 チャレンジパッドでGoogleサービス及びmicroGを使えるようにする為のスクリプト
 
+> [!IMPORTANT]
+> このサービスのサポートは終了しました。  
+> CT2 の場合は、[**Enable GPlay With PC**](https://github.com/Kobold831/EnableGPlayWithPC) を使用してください。  
+> CT3 以降の場合は、上記ページから詳細を確認してください。
+
 ## ダウンロード
 [CPadGPlayEnabler.zip](https://github.com/s1204IT/CPadGPlayEnabler/releases/download/save/CPadGPlayEnabler.zip "CPadGPlayEnabler.zip")
 
-チャレンジパッド３の場合は[Magiskモジュール](https://github.com/s1204IT/CPadGApps/tree/CT3 "s1204IT/CPadGApps")をご使用ください。
+チャレンジパッド３・Neo・Next の場合は[Magiskモジュール](https://github.com/s1204IT/CPadGApps "s1204IT/CPadGApps")をご使用ください。
 
 ## 対象端末
 - TAB-A03-BS (CT2S)
